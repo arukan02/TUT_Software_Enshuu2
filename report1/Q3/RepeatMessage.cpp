@@ -10,6 +10,7 @@ std::ostream &operator<<(std::ostream &stream, const RepeatMessage &obj){
         for(int i = 0; i < obj.getNloops(); i++){
             stream << obj.getMessage();
         }
+        stream << std::endl;
     }
     return stream;
 }
@@ -18,3 +19,9 @@ std::ostream &operator<<(std::ostream &stream, const RepeatMessage &obj){
 const int RepeatMessage::getNloops()const{
     return nloops;
 }
+
+//Destructor
+RepeatMessage::~RepeatMessage(){
+    if(message != nullptr)
+    delete[] message;
+} 

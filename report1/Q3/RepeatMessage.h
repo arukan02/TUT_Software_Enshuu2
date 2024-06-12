@@ -11,6 +11,7 @@ private:
 
 public:
     RepeatMessage(int nloops); 
+    ~RepeatMessage();
     const int getNloops()const;
     //overload (<<) operator for RepeatMessage class
     friend std::ostream &operator<<(std::ostream& stream, const RepeatMessage& obj);
