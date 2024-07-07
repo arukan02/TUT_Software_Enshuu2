@@ -52,11 +52,11 @@ int main (int argc, char *argv[]){
         arr.push_back(randoms(mt));
     }
 
-    std::ofstream outfile("plot_data.txt");
+    std::ofstream outfile("plot_data_exponent.txt");
     outfile << "N\tMeanDifferenceSquared\tVarianceDifferenceSquared\n";
 
     // Calculate squared differences
-    for(int i = 100; i <= numData; i += 100){
+    for(int i = 1; i <= numData; i += 50){
         meanDifferenceSquared = std::pow(calculateMean(arr, i) - mean, 2);
         varianceDifferenceSquared = std::pow(calculateVariance(arr, i) - variance, 2);
         
@@ -64,6 +64,6 @@ int main (int argc, char *argv[]){
     }    
     
     outfile.close();
-    std::cout << "Data saved to plot_data.txt" << std::endl;
+    std::cout << "Data saved to plot_data_exponent.txt" << std::endl;
     return 0;
 }
