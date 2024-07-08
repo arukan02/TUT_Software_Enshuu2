@@ -1,69 +1,66 @@
 #include <iostream>
-#include <random> //to use std::mt19937
-#include <cmath> //for std::pow and std::sqrt
-#include <vector>
-#include <cstdlib> //for std::atof and std::atoi
 #include <fstream>
-#include <iomanip>
+#include <vector>
+#include <Eigen/Dense>
 
-double calculateMean (const std::vector<double>& arr, int n){
-    double sum = 0.0;
-    for(int i= 0; i < n; i++){
-        sum += arr[i];
+// Function to read data from a file
+bool readData(const std::string& filename, std::vector<double>& x, std::vector<double>& y) {
+    std::ifstream infile(filename);
+    if (!infile.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return false;
     }
-    return sum / n;
+    // Skip the header line
+    std::string header;
+    std::getline(infile, header); 
+    double a, b, x_val, y_val;
+    while (infile >> a >> b >> x_val >> y_val) {
+        x.push_back(x_val);
+        y.push_back(y_val);
+    }
+    infile.close();
+    return true;
 }
 
-double calculateVariance(const std::vector<double>& arr, int n){
-    double sum = 0.0;
-    double mean = calculateMean(arr, n);
+// Function to perform least squares fitting
+void leastSquaresFit(const std::vector<double>& x, const std::vector<double>& y, double& slope, double& intercept) {
+    int n = x.size();
+    Eigen::MatrixXd A(n, 2);
+    Eigen::VectorXd b(n);
 
-    for (int i= 0; i < n; i++){
-        sum += std::pow(arr[i] - mean, 2);
+    // Fill matrix A and vector b
+    for (int i = 0; i < n; ++i) {
+        A(i, 0) = x[i];
+        A(i, 1) = 1.0;
+        b[i] = y[i];
     }
-    return sum / n;
+
+    // Solve the normal equation A^T A w = A^T b
+    Eigen::VectorXd w = (A.transpose() * A).ldlt().solve(A.transpose() * b);
+
+    // Extract slope and intercept
+    slope = w[0];
+    intercept = w[1];
 }
 
-int main (int argc, char *argv[]){
-    double meanDifferenceSquared, varianceDifferenceSquared;
-    if(argc != 5){
-        std::cerr << "Usage: " << argv[0] << " <seed> <number of data> <mean> <variance>" << std::endl;
+int main() {
+    // Vectors to store the x and y coordinates
+    std::vector<double> x, y;
+
+    // Read data from file
+    if (!readData("noisy_data.txt", x, y)) {
         return 1;
     }
 
-    //parse input
-    std::uint32_t seed = std::atoi(argv[1]);
-    int numData = std::atoi(argv[2]);
-    double mean = std::atof(argv[3]);
-    double variance = std::atof(argv[4]);
+    // Variables to store the slope and intercept
+    double slope, intercept;
 
-    double stdev = std::sqrt(variance);
-    
-    std::cout << "Calculating sample mean and sample variance" <<std::endl;
+    // Perform least squares fitting
+    leastSquaresFit(x, y, slope, intercept);
 
-    std::vector<double> arr;
-    //
-    std::mt19937 mt(seed); //instantiate 32-bit Mersenne Twister with a seed from std::random_device to ensure different results every run
-    
-    //create a reusable random number generator that generates uniform numbers between -100 and 100
-    std::normal_distribution<double> randoms{mean, stdev};
-    //put random numbers in arr
-    for(int count = 0; count < numData; ++count){
-        arr.push_back(randoms(mt));
-    }
+    // Output the results
+    std::cout << "Slope: " << slope << std::endl;
+    std::cout << "Intercept: " << intercept << std::endl;
 
-    std::ofstream outfile("plot_data.txt");
-    outfile << "N\tMeanDifferenceSquared\tVarianceDifferenceSquared\n";
-
-    // Calculate squared differences
-    for(int i = 100; i <= numData; i += 100){
-        meanDifferenceSquared = std::pow(calculateMean(arr, i) - mean, 2);
-        varianceDifferenceSquared = std::pow(calculateVariance(arr, i) - variance, 2);
-        
-        outfile << i << "\t" << meanDifferenceSquared << "\t" << varianceDifferenceSquared << "\n";
-    }    
-    
-    outfile.close();
-    std::cout << "Data saved to plot_data.txt" << std::endl;
     return 0;
 }

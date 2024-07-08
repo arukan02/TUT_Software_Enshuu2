@@ -6,35 +6,17 @@
 #include <fstream>
 #include <iomanip>
 
-double calculateMean(const std::vector<double>& arr, int n) {
-    double sum = 0.0;
-    for (int i = 0; i < n; i++) {
-        sum += arr[i];
-    }
-    return sum / n;
-}
-
-double calculateVariance(const std::vector<double>& arr, int n) {
-    double sum = 0.0;
-    double mean = calculateMean(arr, n);
-
-    for (int i = 0; i < n; i++) {
-        sum += std::pow(arr[i] - mean, 2);
-    }
-    return sum / n;
-}
-
 int main(int argc, char* argv[]) {
-    if (argc != 5) {
-        std::cerr << "Usage: " << argv[0] << " <seed> <number of data> <mean> <variance>" << std::endl;
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <seed> <number of data>" << std::endl;
         return 1;
     }
 
     // Parse input
     std::uint32_t seed = std::atoi(argv[1]);
     int numData = std::atoi(argv[2]);
-    double mean = std::atof(argv[3]);
-    double variance = std::atof(argv[4]);
+    double mean = 0.0;
+    double variance = 1.0;
 
     double stdev = std::sqrt(variance);
 
@@ -63,23 +45,11 @@ int main(int argc, char* argv[]) {
         noisy_y_coords[i] = y_coords[i] + noise_dist(mt);
     }
 
-    // Calculate and output the mean and variance of the noisy data
-    double mean_x = calculateMean(noisy_x_coords, numData);
-    double variance_x = calculateVariance(noisy_x_coords, numData);
-
-    double mean_y = calculateMean(noisy_y_coords, numData);
-    double variance_y = calculateVariance(noisy_y_coords, numData);
-
-    std::cout << "Mean of noisy x coordinates: " << mean_x << std::endl;
-    std::cout << "Variance of noisy x coordinates: " << variance_x << std::endl;
-    std::cout << "Mean of noisy y coordinates: " << mean_y << std::endl;
-    std::cout << "Variance of noisy y coordinates: " << variance_y << std::endl;
-
     // Output the data to a file
     std::ofstream outfile("noisy_data.txt");
-    outfile << "x\ty\n";
+    outfile << "x\ty\tx_noise\tynoise\n";
     for (int i = 0; i < numData; ++i) {
-        outfile << noisy_x_coords[i] << "\t" << noisy_y_coords[i] << "\n";
+        outfile << x_coords[i] << "\t" << y_coords[i] << "\t" << noisy_x_coords[i] << "\t" << noisy_y_coords[i] << "\n";
     }
     outfile.close();
 
