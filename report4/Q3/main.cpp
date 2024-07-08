@@ -6,6 +6,22 @@
 #include <fstream>
 #include <iomanip>
 
+// Function to calculate the variance of a vector
+double calculateVariance(const std::vector<double>& arr) {
+    double sum = 0.0;
+    double mean = 0.0;
+    for (const double& value : arr) {
+        sum += value;
+    }
+    mean = sum / arr.size();
+
+    double variance = 0.0;
+    for (const double& value : arr) {
+        variance += std::pow(value - mean, 2);
+    }
+    return variance / arr.size();
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <seed> <number of data>" << std::endl;
@@ -39,11 +55,22 @@ int main(int argc, char* argv[]) {
     // Add noise to the x and y coordinates
     std::vector<double> noisy_x_coords(numData);
     std::vector<double> noisy_y_coords(numData);
+    std::vector<double> noise(numData);
 
     for (int i = 0; i < numData; ++i) {
-        noisy_x_coords[i] = x_coords[i] + noise_dist(mt);
-        noisy_y_coords[i] = y_coords[i] + noise_dist(mt);
+        double noise_val = noise_dist(mt);
+        noisy_x_coords[i] = x_coords[i] + noise_val;
+        noisy_y_coords[i] = y_coords[i] + noise_val;
+        noise[i] = noise_val;
     }
+
+    // Calculate the variance of noisy x and y coordinates
+    double variance_noisy_x = std::abs(calculateVariance(x_coords) - calculateVariance(noisy_x_coords));
+    double variance_noisy_y = std::abs(calculateVariance(y_coords) - calculateVariance(noisy_y_coords));
+
+    std::cout << "Variance of noisy x coordinates: " << variance_noisy_x << std::endl;
+    std::cout << "Variance of noisy y coordinates: " << variance_noisy_y << std::endl;
+    std::cout << "Variance of noise: " << calculateVariance(noise) << std::endl;
 
     // Output the data to a file
     std::ofstream outfile("noisy_data.txt");
