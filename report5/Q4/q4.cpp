@@ -18,6 +18,8 @@ int main() {
     // Scan the plugin directory
     for (const auto& entry : fs::directory_iterator(".")) {
         std::string path = entry.path().string();
+
+        if (path.find(".so") == std::string::npos) continue;
         
         HMODULE hLib = LoadLibrary(path.c_str());
             if (!hLib) {
